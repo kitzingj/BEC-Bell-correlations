@@ -174,5 +174,5 @@ function main_exact(N, n_cut, r_end, points)
 end
 
 # Examples for the execution of the code (uncomment and set parameters to desired values):
-#   main_approx(25, 1.0, 15)
+#   main_approx(10, 0.5, 10)
 #   main_exact(20, 10, 0.5, 10)
