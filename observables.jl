@@ -7,6 +7,12 @@ function approach1(state, n_cut)
     chsh3_norm = 0.0;
     chsh4 = 0.0;
     chsh4_norm = 0.0;
+
+    prob1 = 0.0;
+    prob2 = 0.0;
+    prob3 = 0.0;
+    prob4 = 0.0;
+
     @inbounds begin
         for b2 in 1:n_cut+1
             for b1 in 1:n_cut+1
@@ -59,6 +65,11 @@ function approach23(state, n_cut)
     vacuumB2 = 0.0;
     vacuumB3 = 0.0;
     vacuumB4 = 0.0;
+
+    prob1 = 0.0;
+    prob2 = 0.0;
+    prob3 = 0.0;
+    prob4 = 0.0;
     
     @inbounds begin
         for b2 in 1:n_cut+1
@@ -149,15 +160,31 @@ function approach23_loss(state, n_cut, γ)
     vacuumA4 = 0.0;
     vacuumB4 = 0.0;
     vacuumAB4 = 0.0;
+
+    prob1 = 0.0;
+    prob2 = 0.0;
+    prob3 = 0.0;
+    prob4 = 0.0;
+
+    loss = zeros(n_cut+1, n_cut+1);
+    
+    lossA = 0.0;
+    lossB = 0.0;
     
     @inbounds begin
+        for i in 1:n_cut+1
+            for j in 1:n_cut+1
+                loss[i, j] = G_loss(i-1, j-1, n_cut, γ);
+            end
+        end
+
         for b2 in 1:n_cut+1
             for b1 in 1:n_cut+1
                 for a2 in 1:n_cut+1
                     for a1 in 1:n_cut+1
                         
-                        lossA = G_loss(a1-1, a2-1, n_cut, γ);
-                        lossB = G_loss(b1-1, b2-1, n_cut, γ);
+                        lossA = loss[a1-1, a2-1];
+                        lossB = loss[b1-1, b2-1];
                         
                         prob1 = abs2(state[1][a1, a2, b1, b2]);
                         chsh1 += prob1 * lossA * lossB;
@@ -212,6 +239,12 @@ function approach1_exact(state, n_cut, N)
     chsh3_norm = 0.0;
     chsh4 = 0.0;
     chsh4_norm = 0.0;
+
+    prob1 = 0.0;
+    prob2 = 0.0;
+    prob3 = 0.0;
+    prob4 = 0.0;
+
     @inbounds begin
         for b0 in 1:N+1
             for b2 in 1:n_cut+1
@@ -272,6 +305,11 @@ function approach23_exact(state, n_cut, N)
     vacuumB2 = 0.0;
     vacuumB3 = 0.0;
     vacuumB4 = 0.0;
+
+    prob1 = 0.0;
+    prob2 = 0.0;
+    prob3 = 0.0;
+    prob4 = 0.0;
     
     @inbounds begin
         for b0 in 1:N+1
@@ -374,8 +412,24 @@ function approach23_loss_exact(state, n_cut, N, γ)
     vacuumA4 = 0.0;
     vacuumB4 = 0.0;
     vacuumAB4 = 0.0;
+
+    prob1 = 0.0;
+    prob2 = 0.0;
+    prob3 = 0.0;
+    prob4 = 0.0;
+
+    loss = zeros(n_cut+1, n_cut+1);
+    
+    lossA = 0.0;
+    lossB = 0.0;
     
     @inbounds begin
+        for i in 1:n_cut+1
+            for j in 1:n_cut+1
+                loss[i, j] = G_loss(i-1, j-1, n_cut, γ);
+            end
+        end
+
         for b0 in 1:N+1
             for b2 in 1:n_cut+1
                 for b1 in 1:n_cut+1
@@ -383,8 +437,8 @@ function approach23_loss_exact(state, n_cut, N, γ)
                         for a2 in 1:n_cut+1
                             for a1 in 1:n_cut+1
 
-                                lossA = G_loss(a1-1, a2-1, n_cut, γ);
-                                lossB = G_loss(b1-1, b2-1, n_cut, γ);
+                                lossA = loss[a1-1, a2-1];
+                                lossB = loss[b1-1, b2-1];
 
                                 prob1 = abs2(state[1][a1, a2, a0, b1, b2, b0]);
                                 chsh1 += prob1 * lossA * lossB;
