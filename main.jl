@@ -17,13 +17,15 @@ function main_approx(n_cut, r_end, points)
     u0_approx[1, 1, 1, 1] = 1 + 0im;  # start with 0 atoms in all modes
 
     # Preallocating vectors for the results:
-    approach1_vals = Vector{Float64}(undef, length(r_vals));
-    approach2_vals = Vector{Float64}(undef, length(r_vals));
-    approach2_gamma09_vals = Vector{Float64}(undef, length(r_vals));
-    approach2_gamma07_vals = Vector{Float64}(undef, length(r_vals));
-    approach3_vals = Vector{Float64}(undef, length(r_vals));
-    approach3_gamma09_vals = Vector{Float64}(undef, length(r_vals));
-    approach3_gamma07_vals = Vector{Float64}(undef, length(r_vals));
+    approach1_vals = zeros(length(r_vals));
+    approach2_vals = zeros(length(r_vals));
+    approach2_gamma09_vals = zeros(length(r_vals));
+    approach2_gamma07_vals = zeros(length(r_vals));
+    approach3_vals = zeros(length(r_vals));
+    approach3_gamma09_vals = zeros(length(r_vals));
+    approach3_gamma07_vals = zeros(length(r_vals));
+
+    loss = zeros(n_cut+1, n_cut+1);
 
     #start = time(); # optional tracking of the execution time (uncomment the corresponding lines in the loop)
     index = 0;
@@ -42,8 +44,8 @@ function main_approx(n_cut, r_end, points)
         
         approach1_vals[index] = approach1(sol, p[2]);
         app2, app3 = approach23(sol, p[2]);
-        app2_09, app3_09 = approach23_loss(sol, p[2], 0.9);
-        app2_07, app3_07 = approach23_loss(sol, p[2], 0.7);
+        app2_09, app3_09 = approach23_loss!(sol, p[2], 0.9, loss);
+        app2_07, app3_07 = approach23_loss!(sol, p[2], 0.7, loss);
         approach2_vals[index] = app2;
         approach3_vals[index] = app3;
         approach2_gamma09_vals[index] = app2_09;
@@ -94,14 +96,16 @@ function main_exact(N, n_cut, r_end, points)
     u0_exact[1, 1, p[3]+1, 1, 1, 1] = 1 + 0im;  # start with N atoms in k3 mode (zero-mode of site A)
 
     # Preallocating vectors for the results:
-    approach1_vals = Vector{Float64}(undef, length(r_vals));
-    approach2_vals = Vector{Float64}(undef, length(r_vals));
-    approach2_gamma09_vals = Vector{Float64}(undef, length(r_vals));
-    approach2_gamma07_vals = Vector{Float64}(undef, length(r_vals));
-    approach2_gamma095_vals = Vector{Float64}(undef, length(r_vals));
-    approach3_vals = Vector{Float64}(undef, length(r_vals));
-    approach3_gamma09_vals = Vector{Float64}(undef, length(r_vals));
-    approach3_gamma07_vals = Vector{Float64}(undef, length(r_vals));
+    approach1_vals = zeros(length(r_vals));
+    approach2_vals = zeros(length(r_vals));
+    approach2_gamma09_vals = zeros(length(r_vals));
+    approach2_gamma07_vals = zeros(length(r_vals));
+    approach2_gamma095_vals = zeros(length(r_vals));
+    approach3_vals = zeros(length(r_vals));
+    approach3_gamma09_vals = zeros(length(r_vals));
+    approach3_gamma07_vals = zeros(length(r_vals));
+
+    loss = zeros(n_cut+1, n_cut+1);
 
     #start = time(); # optional tracking the execution time (uncomment the corresponding lines in the loop)
     index = 0;
@@ -125,9 +129,9 @@ function main_exact(N, n_cut, r_end, points)
         
         approach1_vals[index] = approach1_exact(sol, p[2], p[3]);
         app2, app3 = approach23_exact(sol, p[2], p[3]);
-        app2_09, app3_09 = approach23_loss_exact(sol, p[2], p[3], 0.9);
-        app2_07, app3_07 = approach23_loss_exact(sol, p[2], p[3], 0.7);
-        app2_095, app3_095 = approach23_loss_exact(sol, p[2], p[3], 0.95);
+        app2_09, app3_09 = approach23_loss_exact!(sol, p[2], p[3], 0.9, loss);
+        app2_07, app3_07 = approach23_loss_exact!(sol, p[2], p[3], 0.7, loss);
+        app2_095, app3_095 = approach23_loss_exact!(sol, p[2], p[3], 0.95, loss);
         approach2_vals[index] = app2;
         approach3_vals[index] = app3;
         approach2_gamma09_vals[index] = app2_09;

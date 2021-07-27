@@ -135,7 +135,7 @@ function G_loss(k, l, n_cut, γ)
 end
 
 
-function approach23_loss(state, n_cut, γ)
+function approach23_loss!(state, n_cut, γ, loss_array)
     chsh1 = 0.0;
     vacuumAsgnB1 = 0.0;
     vacuumBsgnA1 = 0.0;
@@ -165,8 +165,6 @@ function approach23_loss(state, n_cut, γ)
     prob2 = 0.0;
     prob3 = 0.0;
     prob4 = 0.0;
-
-    loss = zeros(n_cut+1, n_cut+1);
     
     lossA = 0.0;
     lossB = 0.0;
@@ -174,7 +172,7 @@ function approach23_loss(state, n_cut, γ)
     @inbounds begin
         for i in 1:n_cut+1
             for j in 1:n_cut+1
-                loss[i, j] = G_loss(i-1, j-1, n_cut, γ);
+                loss_array[i, j] = G_loss(i-1, j-1, n_cut, γ);
             end
         end
 
@@ -183,8 +181,8 @@ function approach23_loss(state, n_cut, γ)
                 for a2 in 1:n_cut+1
                     for a1 in 1:n_cut+1
                         
-                        lossA = loss[a1-1, a2-1];
-                        lossB = loss[b1-1, b2-1];
+                        lossA = loss_array[a1-1, a2-1];
+                        lossB = loss_array[b1-1, b2-1];
                         
                         prob1 = abs2(state[1][a1, a2, b1, b2]);
                         chsh1 += prob1 * lossA * lossB;
@@ -387,7 +385,7 @@ function G_loss(k, l, n_cut, γ)
 end
 
 
-function approach23_loss_exact(state, n_cut, N, γ)
+function approach23_loss_exact!(state, n_cut, N, γ, loss_array)
     chsh1 = 0.0;
     vacuumAsgnB1 = 0.0;
     vacuumBsgnA1 = 0.0;
@@ -417,8 +415,6 @@ function approach23_loss_exact(state, n_cut, N, γ)
     prob2 = 0.0;
     prob3 = 0.0;
     prob4 = 0.0;
-
-    loss = zeros(n_cut+1, n_cut+1);
     
     lossA = 0.0;
     lossB = 0.0;
@@ -426,7 +422,7 @@ function approach23_loss_exact(state, n_cut, N, γ)
     @inbounds begin
         for i in 1:n_cut+1
             for j in 1:n_cut+1
-                loss[i, j] = G_loss(i-1, j-1, n_cut, γ);
+                loss_array[i, j] = G_loss(i-1, j-1, n_cut, γ);
             end
         end
 
@@ -437,8 +433,8 @@ function approach23_loss_exact(state, n_cut, N, γ)
                         for a2 in 1:n_cut+1
                             for a1 in 1:n_cut+1
 
-                                lossA = loss[a1-1, a2-1];
-                                lossB = loss[b1-1, b2-1];
+                                lossA = loss_array[a1-1, a2-1];
+                                lossB = loss_array[b1-1, b2-1];
 
                                 prob1 = abs2(state[1][a1, a2, a0, b1, b2, b0]);
                                 chsh1 += prob1 * lossA * lossB;
