@@ -27,15 +27,15 @@ function main_approx(n_cut, r_end, points)
 
     loss = zeros(n_cut+1, n_cut+1);
 
-    #start = time(); # optional tracking of the execution time (uncomment the corresponding lines in the loop)
+    start = time(); # optional tracking of the execution time (uncomment the corresponding lines in the loop)
     index = 0;
 
     # Solving the system and calculating observables:
     for r in r_vals
         p = (r, n_cut);
         prob_approx = ODEProblem(H_approx!, u0_approx, timespan, p);  
-        if r < 0.05  # for very small r, the tolerance needs to be smaller to avoid numerical errors
-            sol = solve(prob_approx, Tsit5(), abstol=1e-9, reltol=1e-9, saveat=[5.0,6.0,7.0,8.0]);
+        if r < 0.3  # for very small r, the tolerance needs to be smaller to avoid numerical errors
+            sol = solve(prob_approx, Tsit5(), abstol=1e-11, reltol=1e-11, saveat=[5.0,6.0,7.0,8.0]);
         else
             sol = solve(prob_approx, Tsit5(), abstol=1e-8, reltol=1e-8, saveat=[5.0,6.0,7.0,8.0]);
         end
@@ -54,8 +54,8 @@ function main_approx(n_cut, r_end, points)
         approach3_gamma07_vals[index] = app3_07;
     end
 
-    #elapsed = time() - start;
-    #println("elapsed time:", elapsed);
+    elapsed = time() - start;
+    println("elapsed time:", elapsed);
 
     # save the data for later use:
     save("data_approx.jld", "approach1_vals", approach1_vals,
@@ -64,23 +64,28 @@ function main_approx(n_cut, r_end, points)
         "approach3_gamma07_vals", approach3_gamma07_vals,
         "approach3_gamma09_vals", approach3_gamma09_vals,
         "approach2_gamma07_vals", approach2_gamma07_vals,
-        "approach2_gamma09_vals", approach2_gamma09_vals)
+        "approach2_gamma09_vals", approach2_gamma09_vals,
+        "r_vals", r_vals)
 
     # Plotting:
-    p1_approx = plot(r_vals, approach1_vals, label="(I)");
-    plot!(p1_approx, r_vals, approach3_vals, label="(III) γ=1.0");
-    plot!(p1_approx, r_vals, approach3_gamma09_vals, label="(III) γ=0.9");
-    plot!(p1_approx, r_vals, approach3_gamma07_vals, label="(III) γ=0.7");
-    plot!(xlims = (0, r_end), ylims = (1.95, 2.9), xticks = 0:0.1:r_end, yticks = 2.0:0.1:2.8, xlabel = "r", ylabel="B");
-    plot!(xtickfontsize=16, ytickfontsize=16, legendfontsize=16, xguidefontsize=16, yguidefontsize=16, legend=:bottomleft)
+    p1_approx = plot(r_vals, approach1_vals, label="(I)", linewidth=2, framestyle=:box);
+    plot!(p1_approx, r_vals, approach3_vals, label="(III) γ=1.0", linewidth=2);
+    plot!(p1_approx, r_vals, approach3_gamma09_vals, label="(III) γ=0.9", linewidth=2);
+    plot!(p1_approx, r_vals, approach3_gamma07_vals, label="(III) γ=0.7", linewidth=2);
+    plot!(p1_approx, r_vals, exact_vals, linestyle=:dash, label="", linewidth=2, color="black");
+    plot!(xlims = (0, r_end+0.05), ylims = (1.6, 2.9), xticks = 0:0.1:r_end, yticks = 1.8:0.2:2.8, xlabel = "r", ylabel=L"\cal{B}");
+    plot!(tickfontsize=16, legendfontsize=14, xguidefontsize=20, yguidefontsize=20, legend=:bottomleft);
+    plot!(minorticks=true, fontfamily="Computer Modern");
     savefig(p1_approx, "p1_approx.pdf")
 
-    p2_approx = plot(r_vals, approach2_vals, label="(II) γ=1.0");
-    plot!(p2_approx, r_vals, approach2_gamma09_vals, label="(II) γ=0.9");
-    plot!(p2_approx, r_vals, approach2_gamma07_vals, label="(II) γ=0.7");
-    plot!(xlims = (0, r_end), ylims = (1.75, 2.35), xticks = 0:0.1:r_end, yticks = 1.8:0.1:2.3, xlabel = "r", ylabel="B");
-    plot!(xtickfontsize=16, ytickfontsize=16, legendfontsize=16, xguidefontsize=16, yguidefontsize=16, legend=:topleft)
+    p2_approx = plot(r_vals, approach2_vals, label="(II) γ=1.0", linewidth=2, framestyle=:box);
+    plot!(p2_approx, r_vals, approach2_gamma09_vals, label="(II) γ=0.9", linewidth=2);
+    plot!(p2_approx, r_vals, approach2_gamma07_vals, label="(II) γ=0.7", linewidth=2);
+    plot!(xlims = (0, r_end+0.05), ylims = (1.75, 2.35), xticks = 0:0.1:r_end, yticks = 1.8:0.1:2.3, xlabel = "r", ylabel=L"\cal{B}");
+    plot!(xtickfontsize=16, ytickfontsize=16, legendfontsize=14, xguidefontsize=20, yguidefontsize=20, legend=:topleft);
+    plot!(minorticks=true, fontfamily="Computer Modern");
     savefig(p2_approx, "p2_approx.pdf")
+
 end
 
 
@@ -107,16 +112,16 @@ function main_exact(N, n_cut, r_end, points)
 
     loss = zeros(n_cut+1, n_cut+1);
 
-    #start = time(); # optional tracking the execution time (uncomment the corresponding lines in the loop)
+    start = time(); # optional tracking the execution time (uncomment the corresponding lines in the loop)
     index = 0;
 
     for r in r_vals
         p = (r, n_cut, N);
         prob_exact = ODEProblem(H_exact!, u0_exact, timespan, p);
 
-        #checkpoint = time()  # optional time tracking
+        checkpoint = time()  # optional time tracking
         if r < 0.05  # for very small r, the tolerance needs to be smaller to avoid numerical errors
-            sol = solve(prob_exact, Tsit5(), abstol=1e-9, reltol=1e-9, saveat=[5.0,6.0,7.0,8.0]);
+            sol = solve(prob_exact, Tsit5(), abstol=1e-11, reltol=1e-11, saveat=[5.0,6.0,7.0,8.0]);
         else
             sol = solve(prob_exact, Tsit5(), abstol=1e-8, reltol=1e-8, saveat=[5.0,6.0,7.0,8.0]);
         end
@@ -124,8 +129,8 @@ function main_exact(N, n_cut, r_end, points)
         index += 1;
         
         println("Solved ", index)
-        #elapsed = time() - checkpoint;
-        #println("Time elapsed for ", index, " :", elapsed);
+        elapsed = time() - checkpoint;
+        println("Time elapsed for ", index, " :", elapsed);
         
         approach1_vals[index] = approach1_exact(sol, p[2], p[3]);
         app2, app3 = approach23_exact(sol, p[2], p[3]);
@@ -142,8 +147,8 @@ function main_exact(N, n_cut, r_end, points)
         println("Done with ", index)
     end
 
-    #elapsed = time() - start;
-    #println("elapsed time:", elapsed);
+    elapsed = time() - start;
+    println("elapsed time:", elapsed);
 
     # save the data for later use:
     save("data_exact.jld", "approach1_vals", approach1_vals,
@@ -153,26 +158,29 @@ function main_exact(N, n_cut, r_end, points)
         "approach3_gamma09_vals", approach3_gamma09_vals,
         "approach2_gamma07_vals", approach2_gamma07_vals,
         "approach2_gamma09_vals", approach2_gamma09_vals,
-        "approach2_gamma095_vals", approach2_gamma095_vals)
+        "approach2_gamma095_vals", approach2_gamma095_vals,
+        "r_vals", r_vals)
 
     # Plotting:
-    p1 = plot(r_vals, approach1_vals, label="(I)");
-    plot!(p1, r_vals, approach3_vals, label="(III) γ=1.0");
-    plot!(p1, r_vals, approach3_gamma09_vals, label="(III) γ=0.9");
-    plot!(p1, r_vals, approach3_gamma07_vals, label="(III) γ=0.7");
-    plot!(xlims = (0, r_end), ylims = (1.95, 2.9), xticks = 0:0.1:r_end, yticks = 2.0:0.1:2.8, xlabel = "r", ylabel="B");
-    plot!(xtickfontsize=14, ytickfontsize=14, legendfontsize=14, xguidefontsize=14, yguidefontsize=14, legend=:bottomleft)
+    p1 = plot(r_vals, approach1_vals, label="(I)", linewidth=2, framestyle=:box);
+    plot!(p1, r_vals, approach3_vals, label="(III) γ=1.0", linewidth=2);
+    plot!(p1, r_vals, approach3_gamma09_vals, label="(III) γ=0.9", linewidth=2);
+    plot!(p1, r_vals, approach3_gamma07_vals, label="(III) γ=0.7", linewidth=2);
+    plot!(p1, r_vals, exact_vals, linestyle=:dash, label="", linewidth=2, color="black");
+    plot!(xlims = (0, r_end+0.05), ylims = (1.6, 2.9), xticks = 0:0.1:r_end, yticks = 1.8:0.2:2.8, xlabel = "r", ylabel=L"\cal{B}");
+    plot!(tickfontsize=16, legendfontsize=14, xguidefontsize=20, yguidefontsize=20, legend=:bottomleft);
+    plot!(minorticks=true, fontfamily="Computer Modern");
     savefig(p1, "p1_exact.pdf")
 
-    p2 = plot(r_vals, approach2_vals, label="(II) γ=1.0");
-    plot!(p2, r_vals, approach2_gamma095_vals, label="(II) γ=0.95");
-    plot!(p2, r_vals, approach2_gamma09_vals, label="(II) γ=0.9");
-    plot!(p2, r_vals, approach2_gamma07_vals, label="(II) γ=0.7");
-    plot!(xlims = (0, r_end), ylims = (1.75, 2.35), xticks = 0:0.1:r_end, yticks = 1.8:0.1:2.3, xlabel = "r", ylabel="B");
-    plot!(xtickfontsize=14, ytickfontsize=14, legendfontsize=14, xguidefontsize=14, yguidefontsize=14, legend=:topleft)
+    p2 = plot(r_vals, approach2_vals, label="(II) γ=1.0", linewidth=2, framestyle=:box);
+    plot!(p2, r_vals, approach2_gamma09_vals, label="(II) γ=0.9", linewidth=2);
+    plot!(p2, r_vals, approach2_gamma07_vals, label="(II) γ=0.7", linewidth=2);
+    plot!(xlims = (0, r_end+0.05), ylims = (1.75, 2.35), xticks = 0:0.1:r_end, yticks = 1.8:0.1:2.3, xlabel = "r", ylabel=L"\cal{B}");
+    plot!(xtickfontsize=16, ytickfontsize=16, legendfontsize=14, xguidefontsize=20, yguidefontsize=20, legend=:topleft);
+    plot!(minorticks=true, fontfamily="Computer Modern");
     savefig(p2, "p2_exact.pdf")
 end
 
 # Examples for the execution of the code (uncomment and set parameters to desired values):
-#   main_approx(10, 0.5, 10)
-#   main_exact(20, 10, 0.5, 10)
+#main_approx(40, 0.7, 15) 
+#main_exact(15, 15, 0.5, 10) 
