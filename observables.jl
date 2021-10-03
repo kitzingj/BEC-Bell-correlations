@@ -374,17 +374,6 @@ function approach23_exact(state, n_cut, N)
 end
 
 
-function G_loss(k, l, n_cut, γ)
-    sum = 0
-    for i in 0:n_cut
-        for j in 0:i-1
-            sum += binomial(k, k-j) * binomial(l, l-i) * γ^(i+j) * (1 - γ)^(k-j+l-i)
-        end
-    end
-    return 1 - 2*sum
-end
-
-
 function approach23_loss_exact!(state, n_cut, N, γ, loss_array)
     chsh1 = 0.0;
     vacuumAsgnB1 = 0.0;
